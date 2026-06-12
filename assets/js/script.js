@@ -215,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Available tracks
     const trackMap = {
       'velvet_midnight': {
-        title: 'Velvet Midnight',
-        file: 'assets/audio/velvet_midnight.mp3',
+        title: '2am Wisdom',
+        file: 'assets/audio/2am_wisdom.mp3',
         duration: '4:05'
       },
       'ghost_in_the_machine': {
