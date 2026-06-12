@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const trackMap = {
       'velvet_midnight': {
         title: '2am Wisdom',
-        file: 'assets/audio/2am_wisdom.mp3',
+        file: 'assets/audio/2am_wisdom.m4a',
         duration: '4:05'
       },
       'ghost_in_the_machine': {
@@ -254,8 +254,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadTrack(trackId) {
       const track = trackMap[trackId];
       if (!track || !track.file) return false;
-      audio.src = track.file;
-      audio.load();
+      // Update the source element
+      const source = audio.querySelector('source');
+      if (source) {
+        source.src = track.file;
+        audio.load();
+      } else {
+        audio.src = track.file;
+        audio.load();
+      }
       playerTitle.textContent = track.title;
       playerStatus.textContent = 'Now Playing';
       currentTrack = trackId;
@@ -271,10 +278,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Play/Pause
     playBtn.addEventListener('click', async () => {
       try {
-        // Always try to load the track if not already loaded
-        if (!audio.src || audio.src === window.location.href || audio.getAttribute('data-loaded') !== 'true') {
+        // Ensure the source element is pointing to our track
+        const source = audio.querySelector('source');
+        if (!source || !source.src || source.src === window.location.href) {
           loadTrack('velvet_midnight');
-          audio.setAttribute('data-loaded', 'true');
         }
         
         if (audio.paused) {
@@ -284,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (e) {
         console.warn('Playback error:', e.message);
-        // If autoplay blocked, the user needs to click again
         if (e.name === 'NotAllowedError') {
           playerStatus.textContent = 'Click again to play';
           setTimeout(() => { playerStatus.textContent = 'Now Playing'; }, 2000);
