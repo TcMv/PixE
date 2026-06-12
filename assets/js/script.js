@@ -269,17 +269,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Play/Pause
-    playBtn.addEventListener('click', () => {
-      if (audio.src && audio.src !== window.location.href) {
+    playBtn.addEventListener('click', async () => {
+      try {
+        // Always try to load the track if not already loaded
+        if (!audio.src || audio.src === window.location.href || audio.getAttribute('data-loaded') !== 'true') {
+          loadTrack('velvet_midnight');
+          audio.setAttribute('data-loaded', 'true');
+        }
+        
         if (audio.paused) {
-          audio.play();
+          await audio.play();
         } else {
           audio.pause();
         }
-      } else {
-        // Try loading the default track
-        if (loadTrack('velvet_midnight')) {
-          audio.play();
+      } catch (e) {
+        console.warn('Playback error:', e.message);
+        // If autoplay blocked, the user needs to click again
+        if (e.name === 'NotAllowedError') {
+          playerStatus.textContent = 'Click again to play';
+          setTimeout(() => { playerStatus.textContent = 'Now Playing'; }, 2000);
         }
       }
     });
