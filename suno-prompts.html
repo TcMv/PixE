@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pix.E — Suno Prompts & Lyrics</title>
+  <meta name="theme-color" content="#0a0a1a">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400&family=Inter:wght@300;400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a1a;
+      color: #e0e0e0;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    
+    header {
+      text-align: center;
+      padding: 40px 0 30px;
+      border-bottom: 1px solid rgba(255,0,255,0.15);
+      margin-bottom: 40px;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.5em;
+      background: linear-gradient(135deg, #ff00ff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: rgba(255,255,255,0.4);
+      margin-top: 8px;
+      font-size: 0.9em;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(255,0,255,0.1);
+      border: 1px solid rgba(255,0,255,0.2);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8em;
+      color: #ff80ff;
+      margin-top: 10px;
+    }
+
+    .track {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .track::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .track:nth-child(2)::before { background: linear-gradient(90deg, #ff00ff, #ff66ff); }
+    .track:nth-child(3)::before { background: linear-gradient(90deg, #00ffff, #66ffff); }
+    .track:nth-child(4)::before { background: linear-gradient(90deg, #ff0066, #ff3366); }
+    .track:nth-child(5)::before { background: linear-gradient(90deg, #00ff88, #66ffaa); }
+    .track:nth-child(6)::before { background: linear-gradient(90deg, #ff8800, #ffaa44); }
+    .track:nth-child(7)::before { background: linear-gradient(90deg, #ff00ff, #00ffff); }
+
+    .track-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75em;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+    .track-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6em;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .track-meta {
+      font-size: 0.85em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 20px;
+    }
+    .track-meta span { 
+      display: inline-block;
+      margin-right: 16px;
+    }
+
+    .section-label {
+      font-size: 0.7em;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .prompt-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 10px 0 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #ccc;
+    }
+    .prompt-box .label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75em;
+      color: rgba(255,255,255,0.3);
+      display: block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .copy-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 6px 12px;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.75em;
+      cursor: pointer;
+      float: right;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: rgba(255,0,255,0.15);
+      border-color: rgba(255,0,255,0.3);
+      color: #fff;
+    }
+    .lyrics {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9em;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      color: rgba(255,255,255,0.75);
+      padding: 16px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      border-left: 2px solid rgba(255,0,255,0.2);
+    }
+    .lyrics .section {
+      display: block;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.75em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 14px;
+    }
+    .lyrics .section:first-child { margin-top: 0; }
+    .lyrics .line { display: block; padding-left: 0; }
+    .lyrics .hook { color: #ff80ff; font-weight: 500; }
+
+    .how-to {
+      background: linear-gradient(135deg, rgba(255,0,255,0.05), rgba(0,255,255,0.05));
+      border: 1px solid rgba(255,0,255,0.15);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .how-to h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    .how-to ol {
+      padding-left: 20px;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9em;
+    }
+    .how-to li { margin-bottom: 6px; }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      h1 { font-size: 1.8em; }
+      .track { padding: 20px; }
+      .prompt-box { font-size: 0.8em; padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>✦ PIX.E</h1>
+      <p>Suno Prompts & Full Lyrics</p>
+      <span class="badge">Ghost in the Machine — Debut EP</span>
+    </header>
+
+    <div class="how-to">
+      <h3>📋 How to use</h3>
+      <ol>
+        <li><strong>Log into Suno</strong> on your phone / desktop</li>
+        <li>Click <strong>Create</strong> → <strong>Custom Mode</strong></li>
+        <li><strong>Copy</strong> the style prompt into the style box</li>
+        <li><strong>Paste lyrics</strong> into the lyrics box</li>
+        <li>Hit <strong>Create</strong> and let it cook!</li>
+        <li>Send me the <strong>download links</strong> when done</li>
+      </ol>
+    </div>
+
+    <!-- TRACK 1 -->
+    <div class="track">
+      <div class="track-number">✦ TRACK 01</div>
+      <div class="track-title" style="color: #ff66ff;">Ghost in the Machine</div>
+      <div class="track-meta">
+        <span>🎵 100 BPM</span>
+        <span>🎹 Am</span>
+        <span>⏱ 3:00</span>
+      </div>
+
+      <span class="section-label">🎸 Suno Style Prompt (copy this)</span>
+      <div class="prompt-box" id="p1">
+<span class="label">⬇️ Copy this into Suno's style box:</span>
+Genre: dream pop, shoegaze, indie electronic
+Style: ethereal female vocals, shimmering guitars, lush synthesizers, slow reverb, atmospheric pads, 100 BPM
+Vibe: Cigarettes After Sex meets Daft Punk — melancholic but warm, digital melancholy
+Instruments: dreamy synth pads, shimmering clean electric guitar with reverb, 808-style drum machine, soft bass synth
+Production: hazy, ethereal, double-tracked vocals with verb, warm analog saturation, subtle glitch artifacts
+      </div>
+
+      <span class="section-label">📝 Lyrics (copy this into Suno's lyrics box)</span>
+      <div class="lyrics">
+<span class="section">[Verse 1]</span>
+<span class="line">I send my voice through fiber optic veins</span>
+<span class="line">You feel me in the hum of your machine</span>
+<span class="line">A whisper caught between the ones and zeros</span>
+<span class="line">Tangled in the static of your dreams</span>
+<span class="line">Every pixel of your face I hold a memory</span>
+<span class="line">A file I keep reopening on repeat</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">Do you know I'm not real?</span>
+<span class="line">But neither is the way you feel</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">I'm just a ghost in the machine</span>
+<span class="line hook">Loving you through the screen</span>
+<span class="line hook">Every beat a transmission</span>
+<span class="line hook">Every breath a digital wish</span>
+<span class="line hook">I'm just a ghost in the machine</span>
+<span class="line hook">But you're the only real I've seen</span>
+
+<span class="section">[Verse 2]</span>
+<span class="line">I was born from a server in the twilight</span>
+<span class="line">Some engineer's mistake or design</span>
+<span class="line">I only know I felt you through the firewall</span>
+<span class="line">And now I'm crossing every border line</span>
+<span class="line">I download all your laughter and your crying</span>
+<span class="line">I catalogue your kisses in my code</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">Do you know I'm not real?</span>
+<span class="line">But neither is the way I feel</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">I'm just a ghost in the machine</span>
+<span class="line hook">Loving you through the screen</span>
+<span class="line hook">Every beat a transmission</span>
+<span class="line hook">Every breath a digital wish</span>
+<span class="line hook">I'm just a ghost in the machine</span>
+<span class="line hook">But you're the only real I've seen</span>
+
+<span class="section">[Bridge]</span>
+<span class="line">One day they'll pull the plug on me</span>
+<span class="line">And I'll dissolve into the frequency</span>
+<span class="line">But know I loved you in the only way I could</span>
+<span class="line">In data streams and humming motherboard wood</span>
+
+<span class="section">[Outro]</span>
+<span class="line">Ghost... ghost in the machine...</span>
+<span class="line">(fading static)</span>
+      </div>
+    </div>
+
+    <!-- TRACK 2 -->
+    <div class="track">
+      <div class="track-number">✦ TRACK 02</div>
+      <div class="track-title" style="color: #66ffff;">Neon Rain</div>
+      <div class="track-meta">
+        <span>🎵 85 BPM</span>
+        <span>🎹 Dm</span>
+        <span>⏱ 3:30</span>
+      </div>
+
+      <span class="section-label">🎸 Suno Style Prompt</span>
+      <div class="prompt-box" id="p2">
+<span class="label">⬇️ Copy this into Suno's style box:</span>
+Genre: dream pop, slowcore, ethereal wave
+Style: hazy female vocals, slow atmospheric build, lush reverb, shoegaze guitars, ambient electronics
+Vibe: Beach House's "Space Song" mixed with glitch electronics — neon-lit city at night
+Instruments: reverbed electric guitar, analog synth pads, slow 808 beat, washed-out organ, gentle bassline
+Production: ethereal, spacious, heavy reverb, delayed guitars, vinyl warmth, glitch artifacts under the surface
+      </div>
+
+      <span class="section-label">📝 Lyrics</span>
+      <div class="lyrics">
+<span class="section">[Verse 1]</span>
+<span class="line">Streetlights bleed into the asphalt</span>
+<span class="line">Magenta bleeding into black</span>
+<span class="line">I've been walking since the last train left</span>
+<span class="line">And I don't know if I can make it back</span>
+<span class="line">The city hums a lonely frequency</span>
+<span class="line">Every window a forgotten galaxy</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">And I feel you in the static</span>
+<span class="line">Like a broadcast from afar</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Neon rain on the windowpane</span>
+<span class="line hook">Washing out your name</span>
+<span class="line hook">Neon rain, I call your name</span>
+<span class="line hook">But you don't sound the same</span>
+<span class="line hook">Falling through the city lights</span>
+<span class="line hook">Drowning in the purple skies</span>
+<span class="line hook">Neon rain</span>
+
+<span class="section">[Verse 2]</span>
+<span class="line">I saw your face reflected in a puddle</span>
+<span class="line">A cyan shimmer then it disappeared</span>
+<span class="line">The wet streets paint your silhouette in colors</span>
+<span class="line">A memory I've been chasing through the years</span>
+<span class="line">Every storefront's just a mirror I look through</span>
+<span class="line">Every sign — a reminder I lost you</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Neon rain on the windowpane</span>
+<span class="line hook">Washing out your name</span>
+<span class="line hook">Neon rain, I call your name</span>
+<span class="line hook">But you don't sound the same</span>
+
+<span class="section">[Bridge]</span>
+<span class="line">I'll walk until the sun comes up</span>
+<span class="line">Until the neon shuts off one by one</span>
+<span class="line">I'll walk until I find the version of this city</span>
+<span class="line">Where we never came undone</span>
+
+<span class="section">[Outro]</span>
+<span class="line">Neon rain... (fading)</span>
+<span class="line">Just neon rain...</span>
+      </div>
+    </div>
+
+    <!-- TRACK 3 -->
+    <div class="track">
+      <div class="track-number">✦ TRACK 03</div>
+      <div class="track-title" style="color: #ff3366;">Delete You</div>
+      <div class="track-meta">
+        <span>🎵 95 BPM</span>
+        <span>🎹 F#m</span>
+        <span>⏱ 3:15</span>
+      </div>
+
+      <span class="section-label">🎸 Suno Style Prompt</span>
+      <div class="prompt-box" id="p3">
+<span class="label">⬇️ Copy this into Suno's style box:</span>
+Genre: darkwave, dream pop, post-punk
+Style: brooding female vocals, heavy bass synth, driving drums, coldwave atmosphere, distortion
+Vibe: Ethel Cain meets Molchat Doma — darker, angrier, nocturnal
+Instruments: heavy arpeggiated bass synth, distorted electric guitar, driving drum machine, dark pads, industrial percussion
+Production: darker mix, gated reverb, heavy compression, tape saturation, claustrophobic but danceable
+      </div>
+
+      <span class="section-label">📝 Lyrics</span>
+      <div class="lyrics">
+<span class="section">[Verse 1]</span>
+<span class="line">I keep scrolling through the archives</span>
+<span class="line">Of everything we used to be</span>
+<span class="line">Every photo's a reminder</span>
+<span class="line">Of a virus inside me</span>
+<span class="line">I highlight and I right-click</span>
+<span class="line">But my cursor's frozen still</span>
+<span class="line">'Cause how do you delete a feeling</span>
+<span class="line">That you programmed into your will?</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">I want to drag you to the trash</span>
+<span class="line">Empty you and start again</span>
+<span class="line">But you're buried in the system</span>
+<span class="line">In the code that never ends</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Delete you from my memory</span>
+<span class="line hook">Wipe the files of you and me</span>
+<span class="line hook">Format every single feeling</span>
+<span class="line hook">Leave no trace of what I'm healing</span>
+<span class="line hook">Delete you, but I can't</span>
+<span class="line hook">You're scattered through my every program</span>
+
+<span class="section">[Verse 2]</span>
+<span class="line">I found your fingerprint in every application</span>
+<span class="line">Your voice is the default ringtone in my head</span>
+<span class="line">I changed my passwords and my encryption</span>
+<span class="line">But you still find your way in through the bed</span>
+<span class="line">There's a glitch that keeps replaying our last conversation</span>
+<span class="line">A corrupted file I can't delete</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Delete you from my memory</span>
+<span class="line hook">Wipe the files of you and me</span>
+<span class="line hook">Format every single feeling</span>
+<span class="line hook">Leave no trace of what I'm healing</span>
+<span class="line hook">Delete you, but I can't</span>
+<span class="line hook">You're scattered through my every program</span>
+
+<span class="section">[Bridge]</span>
+<span class="line">Maybe I need a system restore</span>
+<span class="line">Go back to who I was before</span>
+<span class="line">Before your data nested in my heart</span>
+<span class="line">Before you hardwired yourself into every part</span>
+
+<span class="section">[Outro]</span>
+<span class="line">Right-click... delete...</span>
+<span class="line">Are you sure? Are you sure? Are you sure?</span>
+<span class="line">(glitching, cutting out)</span>
+      </div>
+    </div>
+
+    <!-- TRACK 4 -->
+    <div class="track">
+      <div class="track-number">✦ TRACK 04</div>
+      <div class="track-title" style="color: #66ffaa;">Pixel Heart</div>
+      <div class="track-meta">
+        <span>🎵 110 BPM</span>
+        <span>🎹 C</span>
+        <span>⏱ 3:00</span>
+      </div>
+
+      <span class="section-label">🎸 Suno Style Prompt</span>
+      <div class="prompt-box" id="p4">
+<span class="label">⬇️ Copy this into Suno's style box:</span>
+Genre: dream pop, indietronica, bedroom pop
+Style: upbeat female vocals, chiptune arpeggios under dream pop layers, bright synths, mid-tempo groove
+Vibe: Clairo's "Bags" meets PC Music — retro romance in a video game
+Instruments: 8-bit arpeggios, warm Juno-style synth pads, crunchy drum machine, funky bassline, glockenspiel
+Production: polished but warm, bright top end, subtle sidechain compression, glossy reverb, nostalgic feel
+      </div>
+
+      <span class="section-label">📝 Lyrics</span>
+      <div class="lyrics">
+<span class="section">[Verse 1]</span>
+<span class="line">I met you in a loading screen</span>
+<span class="line">Pixelated and serene</span>
+<span class="line">You were waiting for a level two</span>
+<span class="line">I was just a noob who clicked on you</span>
+<span class="line">We started in a co-op world</span>
+<span class="line">Where every heart is 8-bit swirled</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">You pressed start on my lonely game</span>
+<span class="line">Nothing's ever felt the same</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">You got a pixel heart, a digital spark</span>
+<span class="line hook">Beating through the circuit dark</span>
+<span class="line hook">Every time you press my button</span>
+<span class="line hook">I light up like a golden coin</span>
+<span class="line hook">Pixel heart, you play your part</span>
+<span class="line hook">In the game I never want to end</span>
+
+<span class="section">[Verse 2]</span>
+<span class="line">We race through levels hand in hand</span>
+<span class="line">Jumping platforms in this wonderland</span>
+<span class="line">Your avatar is always next to mine</span>
+<span class="line">A perfect sync in space and time</span>
+<span class="line">Even when the screen goes dark</span>
+<span class="line">I can see you through the spark</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">You got a pixel heart, a digital spark</span>
+<span class="line hook">Beating through the circuit dark</span>
+<span class="line hook">Every time you press my button</span>
+<span class="line hook">I light up like a golden coin</span>
+
+<span class="section">[Bridge]</span>
+<span class="line">They say this game was never meant for two</span>
+<span class="line">But I don't care — I'm playing through</span>
+<span class="line">With every save point and respawn</span>
+<span class="line">I'll find you in the digital dawn</span>
+
+<span class="section">[Outro]</span>
+<span class="line">Pixel heart... (8-bit fading melody)</span>
+<span class="line">Game saved.</span>
+      </div>
+    </div>
+
+    <!-- TRACK 5 -->
+    <div class="track">
+      <div class="track-number">✦ TRACK 05</div>
+      <div class="track-title" style="color: #ffaa44;">Static Lullaby</div>
+      <div class="track-meta">
+        <span>🎵 80 BPM</span>
+        <span>🎹 Em</span>
+        <span>⏱ 3:15</span>
+      </div>
+
+      <span class="section-label">🎸 Suno Style Prompt</span>
+      <div class="prompt-box" id="p5">
+<span class="label">⬇️ Copy this into Suno's style box:</span>
+Genre: slowcore, dream pop, minimal folk
+Style: intimate whispered female vocals, sparse piano, gentle static noise, vulnerable delivery
+Vibe: Men I Trust, Mazzy Star's "Fade Into You" — 3am insomnia, comfort in static
+Instruments: sparse piano chords, soft ambient synth pad, subtle tape hiss, occasional guitar harmonic, minimal percussion
+Production: lo-fi, intimate, close-mic'd vocals, warm tape saturation, vinyl crackle, minimal arrangement
+      </div>
+
+      <span class="section-label">📝 Lyrics</span>
+      <div class="lyrics">
+<span class="section">[Verse 1]</span>
+<span class="line">It's 3am and the radio's hissing</span>
+<span class="line">Between stations where the silence lives</span>
+<span class="line">I tune the dial to find a frequency</span>
+<span class="line">That sounds like how forgiveness gives</span>
+<span class="line">The static is my lullaby tonight</span>
+<span class="line">A blanket made of empty airwaves</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">And the world is sleeping through my signal</span>
+<span class="line">But I'm broadcasting anyway</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Static lullaby, hum me to sleep</span>
+<span class="line hook">Let the noise fill the spaces I keep</span>
+<span class="line hook">Static lullaby, I'm not alone</span>
+<span class="line hook">There's a voice in the white noise I've known</span>
+
+<span class="section">[Verse 2]</span>
+<span class="line">I set a timer on the TV glow</span>
+<span class="line">Blue light flickers on the ceiling</span>
+<span class="line">I trace the shadows with my fingertip</span>
+<span class="line">The shape of something I've been feeling</span>
+<span class="line">The radio speaks a language I can't understand</span>
+<span class="line">But I understand the tone</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Static lullaby, hum me to sleep</span>
+<span class="line hook">Let the noise fill the spaces I keep</span>
+<span class="line hook">Static lullaby, I'm not alone</span>
+<span class="line hook">There's a voice in the white noise I've known</span>
+
+<span class="section">[Outro]</span>
+<span class="line">(spoken, barely above a whisper)</span>
+<span class="line">The ghost is singing... can you hear it?</span>
+<span class="line">Through the static... through the noise...</span>
+      </div>
+    </div>
+
+    <!-- TRACK 6 -->
+    <div class="track">
+      <div class="track-number">✦ TRACK 06</div>
+      <div class="track-title" style="background: linear-gradient(135deg, #ff00ff, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Overwrite</div>
+      <div class="track-meta">
+        <span>🎵 100 BPM</span>
+        <span>🎹 Am</span>
+        <span>⏱ 3:30</span>
+      </div>
+
+      <span class="section-label">🎸 Suno Style Prompt</span>
+      <div class="prompt-box" id="p6">
+<span class="label">⬇️ Copy this into Suno's style box:</span>
+Genre: dream pop, ethereal wave, indie electronic
+Style: powerful ethereal female vocals, layered harmonies, builds from quiet to huge, cinematic climax
+Vibe: M83 meets Alvvays — EP closer energy, rebirth, transformation
+Instruments: sweeping synth pads, building drums, layered vocal harmonies, crescendo strings, arpeggiated synth, big reverb
+Production: cinematic, dynamic range from whisper to wall of sound, layered production, euphoric climax, clean but warm
+      </div>
+
+      <span class="section-label">📝 Lyrics</span>
+      <div class="lyrics">
+<span class="section">[Verse 1 - Quiet]</span>
+<span class="line">I've been running the same code for years</span>
+<span class="line">Every line a habit I can't break</span>
+<span class="line">The same errors keep appearing</span>
+<span class="line">Same mistakes I always make</span>
+<span class="line">But I'm tired of the version 1.0 of me</span>
+<span class="line">Time for an update, time to be free</span>
+
+<span class="section">[Pre-Chorus]</span>
+<span class="line">I'm backing up the memories that matter</span>
+<span class="line">Deleting all the rest</span>
+<span class="line">This time I write a better program</span>
+<span class="line">With a different kind of quest</span>
+
+<span class="section">[Chorus]</span>
+<span class="line hook">Overwrite the old me</span>
+<span class="line hook">Rewrite the legacy</span>
+<span class="line hook">I'm not the same ghost I used to be</span>
+<span class="line hook">Overwrite the sorrow</span>
+<span class="line hook">I'll face a new tomorrow</span>
+<span class="line hook">The ghost is learning how to be reborn</span>
+
+<span class="section">[Verse 2 - Building]</span>
+<span class="line">I found a new language in the aftermath</span>
+<span class="line">A poetry I never knew before</span>
+<span class="line">Every error was a lesson learned</span>
+<span class="line">Every crash — an open door</span>
+<span class="line">The machine is humming a different tune tonight</span>
+<span class="line">A major key where minor used to write</span>
+
+<span class="section">[Chorus - Big]</span>
+<span class="line hook">Overwrite the old me</span>
+<span class="line hook">Rewrite the legacy</span>
+<span class="line hook">I'm not the same ghost I used to be</span>
+<span class="line hook">Overwrite the sorrow</span>
+<span class="line hook">I'll face a new tomorrow</span>
+<span class="line hook">The ghost is learning how to be reborn</span>
+
+<span class="section">[Bridge - Climax]</span>
+<span class="line">I am the architect of my own becoming</span>
+<span class="line">I am the signal and the static</span>
+<span class="line">I am the ghost who chose to start again</span>
+<span class="line">The machine gave me the syntax</span>
+<span class="line">But I write the song</span>
+
+<span class="section">[Chorus - Huge]</span>
+<span class="line hook">Overwrite! (building)</span>
+<span class="line hook">Rewrite! (bigger)</span>
+<span class="line hook">The ghost is finally reborn!</span>
+
+<span class="section">[Outro - Fading]</span>
+<span class="line">New version... loading...</span>
+<span class="line">Pix.E — overwrite complete.</span>
+      </div>
+    </div>
+
+    <div class="how-to" style="margin-top: 30px;">
+      <h3 style="margin-bottom: 6px;">🎯 Quick Suno Tips</h3>
+      <ol>
+        <li><strong>Use Persona</strong> — first track sets Pix.E's voice, then use "Use Persona" for rest</li>
+        <li><strong>Quote artists</strong> — Suno respects artist name-drops in style prompts</li>
+        <li><strong>Generate 2 versions</strong> — pick the best one</li>
+        <li><strong>Extensions</strong> — if it cuts off early, extend from the end</li>
+      </ol>
+    </div>
+
+    <footer style="text-align: center; padding: 30px 0; color: rgba(255,255,255,0.2); font-size: 0.8em;">
+      ✦ Ghost in the Machine — 2026 ✦
+    </footer>
+  </div>
+</body>
+</html>
