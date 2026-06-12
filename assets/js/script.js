@@ -456,6 +456,8 @@ function updateAudioData() {
     'neon_rain': { title: 'Neon Rain', file: null, duration: '—' },
     'delete_you': { title: 'Delete You', file: null, duration: '—' },
     'pixel_heart': { title: 'Pixel Heart', file: null, duration: '—' },
+    'static_lullaby': { title: 'Static Lullaby', file: null, duration: '—' },
+    'overwrite': { title: 'Overwrite', file: null, duration: '—' },
   };
 
   let currentTrack = 'velvet_midnight';
