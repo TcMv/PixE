@@ -3,7 +3,9 @@
    Cosmic Interactive Engine (Three.js + Web Audio)
    ═══════════════════════════════════════════════ */
 
-import * as THREE from 'three';
+'use strict';
+
+const THREE = window.THREE;
 
 // ═════════════════════════════════════════════
 // GLOBAL STATE
@@ -173,6 +175,7 @@ function updateAudioData() {
 // 5. THREE.JS — 3D Particle Galaxy
 // ═════════════════════════════════════════════
 (function initThreeGalaxy() {
+  if (!THREE) return;
   const canvas = document.getElementById('heroCanvas');
   if (!canvas) return;
 
@@ -562,6 +565,7 @@ function updateAudioData() {
 // 9. THREE.JS — 3D Gallery Sphere
 // ═════════════════════════════════════════════
 (function init3DGallery() {
+  if (!THREE) return;
   const container = document.getElementById('galleryGrid');
   if (!container) return;
 
