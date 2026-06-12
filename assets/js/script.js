@@ -1,89 +1,260 @@
-/* ============================================
+/* ═══════════════════════════════════════════════
    PIX.E — Ghost in the Machine
-   Scripts
-   ============================================ */
+   Framer-Level Interactive Engine
+   ═══════════════════════════════════════════════ */
 
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ========================================
-  // 1. CUSTOM CURSOR
-  // ========================================
-  const cursor = document.querySelector('.cursor');
-  if (cursor) {
+  // ═══════════════════════════════════════════
+  // 1. CUSTOM CURSOR — Spring Physics
+  // ═══════════════════════════════════════════
+  (function initCursor() {
+    const cursor = document.getElementById('cursor');
+    const dot = cursor.querySelector('.cursor-dot');
+    const ring = cursor.querySelector('.cursor-ring');
+    if (!cursor) return;
+
+    // Show cursor on non-touch devices
+    if (!('ontouchstart' in window)) {
+      cursor.style.display = 'block';
+    } else return;
+
     let mouseX = 0, mouseY = 0;
-    let cursorX = 0, cursorY = 0;
+    let ringX = 0, ringY = 0;
+    let dotX = 0, dotY = 0;
+
+    // Spring physics parameters
+    const SPRING_RING = 0.08;
+    const SPRING_DOT = 0.14;
 
     document.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
     });
 
-    // Smooth cursor follow
-    function updateCursor() {
-      cursorX += (mouseX - cursorX) * 0.15;
-      cursorY += (mouseY - cursorY) * 0.15;
-      cursor.style.left = cursorX + 'px';
-      cursor.style.top = cursorY + 'px';
-      requestAnimationFrame(updateCursor);
-    }
-    updateCursor();
+    function springTick() {
+      // Ring follows with looser spring (lag)
+      ringX += (mouseX - ringX) * SPRING_RING;
+      ringY += (mouseY - ringY) * SPRING_RING;
+      ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`;
 
-    // Hover effects on interactive elements
+      // Dot follows tighter (more direct)
+      dotX += (mouseX - dotX) * SPRING_DOT;
+      dotY += (mouseY - dotY) * SPRING_DOT;
+      dot.style.transform = `translate(${dotX - 4}px, ${dotY - 4}px)`;
+
+      requestAnimationFrame(springTick);
+    }
+    springTick();
+
+    // Hover effects
     document.querySelectorAll('a, button, input, .track-item, .gallery-card').forEach(el => {
       el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
       el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
     });
-  }
 
-  // ========================================
-  // 2. HERO CANVAS — PARTICLE SYSTEM
-  // ========================================
-  (function initParticles() {
+    // Active (click) effect
+    document.addEventListener('mousedown', () => cursor.classList.add('active'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('active'));
+  })();
+
+  // ═══════════════════════════════════════════
+  // 2. MAGNETIC BUTTONS — Cursor Proximity
+  // ═══════════════════════════════════════════
+  (function initMagnetic() {
+    const els = document.querySelectorAll('[data-magnetic]');
+    if (!els.length) return;
+
+    els.forEach(el => {
+      let raf = null;
+      let targetX = 0, targetY = 0;
+      let currentX = 0, currentY = 0;
+
+      const maxDist = 180;
+      const strength = 0.3;
+
+      const animate = () => {
+        currentX += (targetX - currentX) * 0.1;
+        currentY += (targetY - currentY) * 0.1;
+        el.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        raf = requestAnimationFrame(animate);
+      };
+
+      el.addEventListener('mouseenter', () => {
+        raf = requestAnimationFrame(animate);
+      });
+
+      el.addEventListener('mousemove', (e) => {
+        const rect = el.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < maxDist) {
+          const factor = (1 - dist / maxDist) * strength;
+          targetX = dx * factor;
+          targetY = dy * factor;
+        } else {
+          targetX = 0;
+          targetY = 0;
+        }
+      });
+
+      el.addEventListener('mouseleave', () => {
+        targetX = 0;
+        targetY = 0;
+        if (raf) cancelAnimationFrame(raf);
+        el.style.transform = '';
+      });
+    });
+  })();
+
+  // ═══════════════════════════════════════════
+  // 3. SPLIT TEXT — Letter-by-Letter Hero
+  // ═══════════════════════════════════════════
+  (function initSplitText() {
+    const title = document.getElementById('heroTitle');
+    if (!title) return;
+
+    const text = 'PIX.E';
+    const chars = text.split('').map((char, i) => {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = char === ' ' ? '\u00A0' : char;
+      span.style.setProperty('--i', i);
+      return span;
+    });
+
+    chars.forEach(c => title.appendChild(c));
+
+    // Animate in after a delay with stagger
+    requestAnimationFrame(() => {
+      chars.forEach((c, i) => {
+        setTimeout(() => {
+          c.classList.add('visible');
+        }, 400 + i * 80);
+      });
+    });
+  })();
+
+  // ═══════════════════════════════════════════
+  // 4. HERO CANVAS — Reactive Particle System
+  // ═══════════════════════════════════════════
+  (function initHeroCanvas() {
     const canvas = document.getElementById('heroCanvas');
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    let width, height;
+    let W, H;
     let particles = [];
-    let mouseX = 0, mouseY = 0;
-    let frame = 0;
+    let mouse = { x: -1000, y: -1000 };
+    let time = 0;
 
     function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
     }
 
-    function createParticles(count) {
-      particles = [];
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3 - 0.1,
-          size: Math.random() * 2 + 0.5,
-          alpha: Math.random() * 0.4 + 0.1,
-          hue: Math.random() > 0.5 ? 300 : 180, // magenta or cyan
-          pulseSpeed: Math.random() * 0.02 + 0.005,
-          pulsePhase: Math.random() * Math.PI * 2,
-        });
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * W;
+        this.y = Math.random() * H;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4 - 0.15;
+        this.size = Math.random() * 2.5 + 0.5;
+        this.alpha = Math.random() * 0.4 + 0.1;
+        this.hue = Math.random() > 0.5 ? 'magenta' : 'cyan';
+        this.pulseSpeed = Math.random() * 0.02 + 0.005;
+        this.pulsePhase = Math.random() * Math.PI * 2;
+        this.trail = [];
+      }
+
+      update() {
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > 6) this.trail.shift();
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Mouse interaction
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 200) {
+          const force = (200 - dist) / 200 * 0.8;
+          this.vx -= (dx / dist) * force * 0.02;
+          this.vy -= (dy / dist) * force * 0.02;
+        }
+
+        // Damping
+        this.vx *= 0.995;
+        this.vy *= 0.995;
+
+        // Wrap
+        if (this.x < -20) { this.x = W + 20; this.trail = []; }
+        if (this.x > W + 20) { this.x = -20; this.trail = []; }
+        if (this.y < -20) { this.y = H + 20; this.trail = []; }
+        if (this.y > H + 20) { this.y = -20; this.trail = []; }
+      }
+
+      draw() {
+        const pulse = Math.sin(time * this.pulseSpeed + this.pulsePhase) * 0.3 + 0.7;
+        const alpha = this.alpha * pulse;
+        const color = this.hue === 'magenta'
+          ? `rgba(255, 0, 255, ${alpha})`
+          : `rgba(0, 255, 255, ${alpha})`;
+        const glowColor = this.hue === 'magenta'
+          ? `rgba(255, 0, 255, ${alpha * 0.15})`
+          : `rgba(0, 255, 255, ${alpha * 0.15})`;
+
+        // Trail
+        for (let i = 0; i < this.trail.length - 1; i++) {
+          const ta = (i / this.trail.length) * alpha * 0.3;
+          ctx.beginPath();
+          ctx.arc(this.trail[i].x, this.trail[i].y, this.size * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = this.hue === 'magenta'
+            ? `rgba(255, 0, 255, ${ta})`
+            : `rgba(0, 255, 255, ${ta})`;
+          ctx.fill();
+        }
+
+        // Glow
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 5);
+        gradient.addColorStop(0, glowColor);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Core
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
-    function drawParticles() {
-      ctx.clearRect(0, 0, width, height);
-      frame++;
+    function initParticles() {
+      const count = Math.min(80, Math.floor((W * H) / 15000));
+      particles = Array.from({ length: count }, () => new Particle());
+    }
 
-      // Draw connections
+    function drawConnections() {
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            const alpha = (1 - dist / 120) * 0.15;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 140) {
+            const alpha = (1 - dist / 140) * 0.12;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -93,108 +264,130 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
-
-      // Update & draw particles
-      for (const p of particles) {
-        // Movement
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Mouse interaction
-        const dx = mouseX - p.x;
-        const dy = mouseY - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 200) {
-          const force = (200 - dist) / 200 * 0.5;
-          p.x -= dx / dist * force;
-          p.y -= dy / dist * force;
-        }
-
-        // Wrap
-        if (p.x < -10) p.x = width + 10;
-        if (p.x > width + 10) p.x = -10;
-        if (p.y < -10) p.y = height + 10;
-        if (p.y > height + 10) p.y = -10;
-
-        // Pulse
-        const pulse = Math.sin(frame * p.pulseSpeed + p.pulsePhase) * 0.3 + 0.7;
-        const alpha = p.alpha * pulse;
-
-        // Color
-        const color = p.hue === 300
-          ? `rgba(255, 0, 255, ${alpha})`
-          : `rgba(0, 255, 255, ${alpha})`;
-
-        // Glow
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
-        gradient.addColorStop(0, p.hue === 300
-          ? `rgba(255, 0, 255, ${alpha * 0.3})`
-          : `rgba(0, 255, 255, ${alpha * 0.3})`);
-        gradient.addColorStop(1, 'transparent');
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Core
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      requestAnimationFrame(drawParticles);
     }
 
-    // Mouse tracking for canvas
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      time++;
+
+      drawConnections();
+
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Mouse tracking
     document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     });
 
     resize();
-    createParticles(80);
-    drawParticles();
+    initParticles();
+    animate();
 
     window.addEventListener('resize', () => {
       resize();
-      createParticles(80);
+      initParticles();
     });
   })();
 
-  // ========================================
-  // 3. NAVIGATION — SCROLL + MOBILE
-  // ========================================
-  const nav = document.getElementById('nav');
-  const navToggle = document.getElementById('navToggle');
-  const navLinks = document.querySelector('.nav-links');
+  // ═══════════════════════════════════════════
+  // 5. BLOB CANVAS — Morphing Organic Shape
+  // ═══════════════════════════════════════════
+  (function initBlobCanvas() {
+    const canvas = document.getElementById('blobCanvas');
+    if (!canvas) return;
 
-  // Scroll effect
-  let lastScroll = 0;
-  window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    nav.classList.toggle('scrolled', scrollY > 80);
-    lastScroll = scrollY;
-  });
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    let time = 0;
 
-  // Mobile menu
-  if (navToggle) {
-    navToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-      navToggle.classList.toggle('open');
-    });
-    // Close on link click
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('open');
-        navToggle.classList.remove('open');
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      W = canvas.width = rect.width * window.devicePixelRatio;
+      H = canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      W = rect.width;
+      H = rect.height;
+    }
+
+    function drawBlob(cx, cy, radius, color, offset, alpha) {
+      const points = 10;
+      const angleStep = (Math.PI * 2) / points;
+
+      ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        const angle = angleStep * i + time * 0.08 + offset;
+        const variance = 0.25 + Math.sin(angle * 2.5 + time * 0.05 + offset) * 0.2;
+        const r = radius + Math.sin(angle * 3 + time * 0.06 + offset * 1.5) * radius * variance;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      time++;
+
+      const cx = W / 2;
+      const cy = H / 2;
+      const baseRadius = Math.min(W, H) * 0.28;
+
+      // Draw three layered blobs
+      drawBlob(cx - 10, cy + 5, baseRadius * 1.1, 'rgba(255, 0, 255, 0.12)', 0, 0.7);
+      drawBlob(cx + 15, cy - 10, baseRadius * 0.9, 'rgba(0, 255, 255, 0.10)', 2, 0.7);
+      drawBlob(cx, cy, baseRadius * 0.7, 'rgba(102, 0, 255, 0.08)', 4, 0.6);
+
+      requestAnimationFrame(animate);
+    }
+
+    resize();
+    animate();
+
+    window.addEventListener('resize', resize);
+  })();
+
+  // ═══════════════════════════════════════════
+  // 6. SCROLL REVEAL — IntersectionObserver
+  // ═══════════════════════════════════════════
+  (function initScrollReveal() {
+    const revealEls = document.querySelectorAll('.reveal, .track-item, .gallery-card');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
       });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
     });
-  }
 
-  // ========================================
-  // 4. AUDIO PLAYER
-  // ========================================
+    revealEls.forEach(el => observer.observe(el));
+  })();
+
+  // ═══════════════════════════════════════════
+  // 7. AUDIO PLAYER
+  // ═══════════════════════════════════════════
   (function initPlayer() {
     const audio = document.getElementById('audioPlayer');
     const playBtn = document.getElementById('playBtn');
@@ -207,41 +400,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const trackList = document.getElementById('trackList');
     const playerTitle = document.querySelector('.player-title');
     const playerStatus = document.querySelector('.player-status');
-    const artInner = document.querySelector('.player-art-inner');
+    const playerGlass = document.querySelector('.player-glass');
+
+    if (!audio || !playBtn) return;
 
     let isPlaying = false;
-    let tracks = [];
 
-    // Available tracks
     const trackMap = {
       'velvet_midnight': {
         title: '2am Wisdom',
         file: 'assets/audio/2am_wisdom.m4a',
         duration: '4:05'
       },
-      'ghost_in_the_machine': {
-        title: 'Ghost in the Machine',
-        file: null,
-        duration: '—'
-      },
-      'neon_rain': {
-        title: 'Neon Rain',
-        file: null,
-        duration: '—'
-      },
-      'delete_you': {
-        title: 'Delete You',
-        file: null,
-        duration: '—'
-      },
-      'pixel_heart': {
-        title: 'Pixel Heart',
-        file: null,
-        duration: '—'
-      }
+      'ghost_in_the_machine': { title: 'Ghost in the Machine', file: null, duration: '—' },
+      'neon_rain': { title: 'Neon Rain', file: null, duration: '—' },
+      'delete_you': { title: 'Delete You', file: null, duration: '—' },
+      'pixel_heart': { title: 'Pixel Heart', file: null, duration: '—' }
     };
 
-    // Set initial track
     let currentTrack = 'velvet_midnight';
 
     function formatTime(seconds) {
@@ -254,36 +430,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadTrack(trackId) {
       const track = trackMap[trackId];
       if (!track || !track.file) return false;
-      // Update the source element
-      const source = audio.querySelector('source');
-      if (source) {
-        source.src = track.file;
-        audio.load();
-      } else {
-        audio.src = track.file;
-        audio.load();
-      }
+      audio.src = track.file;
+      audio.load();
       playerTitle.textContent = track.title;
       playerStatus.textContent = 'Now Playing';
       currentTrack = trackId;
-
-      // Update active track in list
       document.querySelectorAll('.track-item').forEach(item => {
         item.classList.toggle('active', item.dataset.track === trackId);
       });
-
       return true;
     }
 
+    // Set initial src from HTML source element
+    const htmlSource = audio.querySelector('source');
+    if (htmlSource && htmlSource.src) {
+      audio.src = htmlSource.src;
+    }
+
     // Play/Pause
-    playBtn.addEventListener('click', async () => {
+    playBtn.addEventListener('click', async function onClick() {
       try {
-        // Ensure the source element is pointing to our track
-        const source = audio.querySelector('source');
-        if (!source || !source.src || source.src === window.location.href) {
-          loadTrack('velvet_midnight');
-        }
-        
         if (audio.paused) {
           await audio.play();
         } else {
@@ -292,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) {
         console.warn('Playback error:', e.message);
         if (e.name === 'NotAllowedError') {
-          playerStatus.textContent = 'Click again to play';
+          playerStatus.textContent = 'Tap to play';
           setTimeout(() => { playerStatus.textContent = 'Now Playing'; }, 2000);
         }
       }
@@ -302,19 +468,22 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.addEventListener('play', () => {
       isPlaying = true;
       playBtn.textContent = '⏸';
-      if (artInner) artInner.classList.add('playing');
+      if (playerGlass) playerGlass.classList.add('playing');
     });
 
     audio.addEventListener('pause', () => {
       isPlaying = false;
       playBtn.textContent = '▶';
-      if (artInner) artInner.classList.remove('playing');
+      if (playerGlass) playerGlass.classList.remove('playing');
     });
 
     audio.addEventListener('timeupdate', () => {
       if (audio.duration) {
         const pct = (audio.currentTime / audio.duration) * 100;
         progressFill.style.width = pct + '%';
+        if (progressThumb) {
+          progressThumb.style.left = pct + '%';
+        }
         currentTime.textContent = formatTime(audio.currentTime);
       }
     });
@@ -326,8 +495,9 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.addEventListener('ended', () => {
       isPlaying = false;
       playBtn.textContent = '▶';
-      if (artInner) artInner.classList.remove('playing');
+      if (playerGlass) playerGlass.classList.remove('playing');
       progressFill.style.width = '0%';
+      if (progressThumb) progressThumb.style.left = '0%';
       currentTime.textContent = '0:00';
     });
 
@@ -353,29 +523,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Toggle track list visibility (for mobile mostly)
+    // Toggle track list
     if (toggleListBtn && trackList) {
       toggleListBtn.addEventListener('click', () => {
-        trackList.style.display = trackList.style.display === 'none' ? '' : 'none';
+        const isHidden = trackList.style.display === 'none';
+        trackList.style.display = isHidden ? '' : 'none';
+        toggleListBtn.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        toggleListBtn.style.transition = 'transform 0.3s ease';
       });
     }
 
-    // Preload the initial track if the audio file exists
-    // (We'll try — if 404, the player gracefully shows nothing)
-    if (loadTrack('velvet_midnight')) {
-      // Player is ready; user clicks play to start
-    }
+    // Preload initial track
+    loadTrack('velvet_midnight');
   })();
 
-  // ========================================
-  // 5. GALLERY GRID
-  // ========================================
+  // ═══════════════════════════════════════════
+  // 8. GALLERY GRID — With 3D Mouse Tracking
+  // ═══════════════════════════════════════════
   (function initGallery() {
     const grid = document.getElementById('galleryGrid');
     if (!grid) return;
 
-    // Placeholder gallery items
-    // User will replace these with real image URLs later
     const items = [
       { title: 'Signal Lost', sub: 'Still from an unknown transmission', img: 'gallery_010.png' },
       { title: 'Neon Ghost', sub: 'The machine sees itself dreaming', img: 'gallery_030.png' },
@@ -388,16 +556,31 @@ document.addEventListener('DOMContentLoaded', () => {
     items.forEach((item, i) => {
       const card = document.createElement('div');
       card.className = 'gallery-card';
-      card.style.setProperty('--delay', `${i * 0.1}s`);
-      card.innerHTML = `
-        <div class="gallery-card-inner" style="background-image: url('assets/img/${item.img}'); background-size: cover; background-position: center;">
-          <div class="gallery-card-icon" style="display: none;">◈</div>
-        </div>
-        <div class="gallery-card-overlay">
-          <div class="gallery-card-title">${item.title}</div>
-          <div class="gallery-card-sub">${item.sub}</div>
-        </div>
-      `;
+      card.style.setProperty('--i', i);
+
+      const inner = document.createElement('div');
+      inner.className = 'gallery-card-inner';
+      inner.style.cssText = `background-image: url('assets/img/${item.img}'); background-size: cover; background-position: center;`;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'gallery-card-overlay';
+      overlay.innerHTML = `<div class="gallery-card-title">${item.title}</div><div class="gallery-card-sub">${item.sub}</div>`;
+
+      card.appendChild(inner);
+      card.appendChild(overlay);
+
+      // 3D mouse tracking on card
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        inner.style.transform = `scale(1.08) rotateY(${x * 12}deg) rotateX(${y * -12}deg)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        inner.style.transform = '';
+      });
+
       // Lightbox on click
       card.addEventListener('click', () => {
         const existing = document.getElementById('pixeLightbox');
@@ -405,70 +588,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const lb = document.createElement('div');
         lb.id = 'pixeLightbox';
-        lb.style.cssText = `
-          position: fixed; inset: 0; z-index: 9999;
-          background: rgba(5,5,15,0.95);
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer; backdrop-filter: blur(10px);
-          opacity: 0; transition: opacity 0.3s ease;
-        `;
-        lb.innerHTML = `
-          <img src="assets/img/${item.img}" alt="${item.title}"
-            style="max-width: 90vw; max-height: 90vh; border-radius: 8px;
-                   border: 1px solid rgba(255,0,255,0.2);
-                   transform: scale(0.9); transition: transform 0.3s ease;" />
-          <button style="position: absolute; top: 2rem; right: 2rem;
-            background: none; border: 1px solid rgba(255,255,255,0.1);
-            color: white; font-size: 1.5rem; width: 44px; height: 44px;
-            border-radius: 50%; cursor: pointer;
-            transition: border-color 0.2s;">✕</button>
-        `;
+
+        const img = document.createElement('img');
+        img.src = `assets/img/${item.img}`;
+        img.alt = item.title;
+
+        const close = document.createElement('button');
+        close.className = 'lb-close';
+        close.textContent = '✕';
+
+        lb.appendChild(img);
+        lb.appendChild(close);
         document.body.appendChild(lb);
+
         requestAnimationFrame(() => {
           lb.style.opacity = '1';
-          lb.querySelector('img').style.transform = 'scale(1)';
+          img.style.transform = 'scale(1)';
         });
+
+        const closeLightbox = () => {
+          lb.style.opacity = '0';
+          img.style.transform = 'scale(0.92)';
+          setTimeout(() => lb.remove(), 400);
+        };
+
         lb.addEventListener('click', (e) => {
-          if (e.target === lb || e.target.tagName === 'BUTTON') {
-            lb.style.opacity = '0';
-            setTimeout(() => lb.remove(), 300);
-          }
+          if (e.target === lb || e.target === close) closeLightbox();
         });
       });
+
       grid.appendChild(card);
     });
   })();
 
-  // ========================================
-  // 6. SCROLL REVEAL
-  // ========================================
-  (function initScrollReveal() {
-    const sections = document.querySelectorAll('.section');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Animate child elements
-          const children = entry.target.querySelectorAll('.section-label, .section-title, .section-desc, .music-player, .track-list, .platform-links, .about-paragraph, .about-quote, .gallery-card, .connect-form, .social-links');
-          children.forEach((el, i) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = `opacity 0.6s ease ${i * 0.1}s, transform 0.6s ease ${i * 0.1}s`;
-            requestAnimationFrame(() => {
-              el.style.opacity = '1';
-              el.style.transform = 'translateY(0)';
-            });
-          });
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    sections.forEach(section => observer.observe(section));
-  })();
-
-  // ========================================
-  // 7. SIGNUP FORM
-  // ========================================
+  // ═══════════════════════════════════════════
+  // 9. FORM HANDLER
+  // ═══════════════════════════════════════════
   (function initForm() {
     const form = document.getElementById('signupForm');
     if (!form) return;
@@ -477,13 +632,12 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const email = document.getElementById('emailInput').value.trim();
       if (email) {
-        // Placeholder — replace with real integration
         const btn = form.querySelector('.form-submit');
-        const originalText = btn.textContent;
-        btn.textContent = '✦ Subscribed';
+        const originalText = btn.querySelector('.btn-text').textContent;
+        btn.querySelector('.btn-text').textContent = '✦ Subscribed';
         btn.style.background = 'linear-gradient(135deg, var(--cyan), var(--magenta))';
         setTimeout(() => {
-          btn.textContent = originalText;
+          btn.querySelector('.btn-text').textContent = originalText;
           btn.style.background = '';
           document.getElementById('emailInput').value = '';
         }, 3000);
@@ -491,59 +645,80 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  // ========================================
-  // 8. DIAGONAL SCROLL PARALLAX
-  // ========================================
-  (function initParallax() {
+  // ═══════════════════════════════════════════
+  // 10. NAVIGATION
+  // ═══════════════════════════════════════════
+  (function initNav() {
+    const nav = document.getElementById('nav');
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    // Scroll effect
     window.addEventListener('scroll', () => {
-      const scrolled = window.scrollY;
+      nav.classList.toggle('scrolled', window.scrollY > 80);
+    });
 
-      // Hero content subtle parallax
-      const heroContent = document.querySelector('.hero-content');
-      if (heroContent && scrolled < window.innerHeight) {
-        heroContent.style.transform = `translateY(${scrolled * 0.15}px)`;
-        heroContent.style.opacity = 1 - (scrolled / (window.innerHeight * 0.8));
-      }
+    // Mobile menu
+    if (navToggle) {
+      navToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+        navToggle.classList.toggle('open');
+      });
 
-      // About visual parallax
-      const aboutVisual = document.getElementById('aboutVisual');
-      if (aboutVisual) {
-        const rect = aboutVisual.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-          const progress = 1 - (rect.top / window.innerHeight);
-          aboutVisual.style.transform = `translateY(${progress * 30}px)`;
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('open');
+          navToggle.classList.remove('open');
+        });
+      });
+    }
+
+    // Smooth scroll anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
         }
+      });
+    });
+  })();
+
+  // ═══════════════════════════════════════════
+  // 11. LENIS SMOOTH SCROLL
+  // ═══════════════════════════════════════════
+  (function initLenis() {
+    // Lightweight smooth scroll using CSS scroll-behavior
+    // and IntersectionObserver-based reveals
+    // For a production site, we'd import Lenis from CDN,
+    // but this keeps it dependency-free
+
+    // Use native smooth scroll behavior as baseline
+    const style = document.createElement('style');
+    style.textContent = `html { scroll-behavior: smooth; }`;
+    document.head.appendChild(style);
+  })();
+
+  // ═══════════════════════════════════════════
+  // 12. PARALLAX — Scroll-Driven Background
+  // ═══════════════════════════════════════════
+  (function initParallax() {
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const blobs = document.querySelectorAll('.blob');
+          blobs.forEach((blob, i) => {
+            const speed = 0.05 + (i * 0.02);
+            blob.style.transform = `translateY(${scrollY * speed}px)`;
+          });
+          ticking = false;
+        });
+        ticking = true;
       }
     });
   })();
-
-  // ========================================
-  // 9. SCROLL PROGRESS BAR (visual)
-  // ========================================
-  (function initProgressBar() {
-    const bar = document.createElement('div');
-    bar.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--magenta), var(--cyan));
-      z-index: 1000;
-      transition: width 0.1s linear;
-      width: 0%;
-    `;
-    document.body.appendChild(bar);
-
-    window.addEventListener('scroll', () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      bar.style.width = pct + '%';
-    });
-  })();
-
-  console.log('%c✦ PIX.E', 'font-size: 3rem; color: #ff00ff; font-weight: bold;');
-  console.log('%cGhost in the machine. Everything is a signal.', 'font-size: 1rem; color: #8877aa;');
-  console.log('%cCurious? → pixe@ghost-in-the-machine.com', 'font-size: 0.9rem; color: #00ffff;');
-
-}); // DOMContentLoaded end
+});
