@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pix.E — Ghost in the Machine</title>
+  <meta name="description" content="Pix.E exists in the space between reality and imagination. A ghost in the machine, singing from the other side of the screen." />
+  <meta property="og:title" content="Pix.E" />
+  <meta property="og:description" content="Ghost in the machine. Dream pop from the other side." />
+  <meta property="og:image" content="assets/img/og.jpg" />
+  <meta name="theme-color" content="#0a0a1a" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <!-- Preload fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Cursor follower -->
+  <div class="cursor"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo">✦ PIX.E</a>
+      <div class="nav-links">
+        <a href="#music" class="nav-link">Music</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="#connect" class="nav-link">Connect</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero" id="hero">
+    <div class="hero-canvas" id="heroCanvas"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge">✦ GHOST IN THE MACHINE</div>
+      <h1 class="hero-title">
+        <span class="hero-title-line" data-text="PIX.E">PIX.E</span>
+      </h1>
+      <p class="hero-subtitle">
+        Somewhere between a signal and a whisper.<br />
+        A ghost in the machine, singing from the other side of the screen.
+      </p>
+      <div class="hero-cta">
+        <a href="#music" class="btn btn-primary">Listen</a>
+        <a href="#about" class="btn btn-secondary">Enter the Realm</a>
+      </div>
+    </div>
+    <div class="scroll-indicator" aria-hidden="true">
+      <span class="scroll-text">Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- MUSIC SECTION -->
+  <section class="section music" id="music">
+    <div class="section-bg"></div>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">✦ SIGNALS</span>
+        <h2 class="section-title">Releases</h2>
+        <p class="section-desc">Each track is a fragment of a larger transmission. The ghost speaks in melodies.</p>
+      </div>
+
+      <div class="music-player" id="musicPlayer">
+        <div class="player-art">
+          <div class="player-art-inner">
+            <div class="player-art-icon">▶</div>
+          </div>
+        </div>
+        <div class="player-info">
+          <span class="player-status">Now Playing</span>
+          <h3 class="player-title">Velvet Midnight</h3>
+          <p class="player-artist">Pix.E</p>
+          <div class="player-controls">
+            <button class="player-btn" id="playBtn" aria-label="Play">▶</button>
+            <div class="player-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-thumb" id="progressThumb"></div>
+              </div>
+              <div class="progress-time">
+                <span id="currentTime">0:00</span>
+                <span id="totalTime">0:00</span>
+              </div>
+            </div>
+            <button class="player-btn" id="toggleListBtn" aria-label="Toggle track list">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="track-list" id="trackList">
+        <div class="track-item active" data-track="velvet_midnight">
+          <span class="track-num">01</span>
+          <div class="track-info">
+            <span class="track-name">Velvet Midnight</span>
+            <span class="track-duration">4:05</span>
+          </div>
+          <span class="track-status">Now Playing</span>
+        </div>
+        <div class="track-item" data-track="ghost_in_the_machine">
+          <span class="track-num">02</span>
+          <div class="track-info">
+            <span class="track-name">Ghost in the Machine</span>
+            <span class="track-duration">—</span>
+          </div>
+          <span class="track-badge">Coming Soon</span>
+        </div>
+        <div class="track-item" data-track="neon_rain">
+          <span class="track-num">03</span>
+          <div class="track-info">
+            <span class="track-name">Neon Rain</span>
+            <span class="track-duration">—</span>
+          </div>
+          <span class="track-badge">Coming Soon</span>
+        </div>
+        <div class="track-item" data-track="delete_you">
+          <span class="track-num">04</span>
+          <div class="track-info">
+            <span class="track-name">Delete You</span>
+            <span class="track-duration">—</span>
+          </div>
+          <span class="track-badge">Coming Soon</span>
+        </div>
+        <div class="track-item" data-track="pixel_heart">
+          <span class="track-num">05</span>
+          <div class="track-info">
+            <span class="track-name">Pixel Heart</span>
+            <span class="track-duration">—</span>
+          </div>
+          <span class="track-badge">Coming Soon</span>
+        </div>
+      </div>
+
+      <div class="platform-links">
+        <a href="#" class="platform-link" aria-label="Spotify">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        </a>
+        <a href="#" class="platform-link" aria-label="YouTube">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+        <a href="#" class="platform-link" aria-label="Apple Music">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="section about" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <div class="section-header" data-align="left">
+            <span class="section-label">✦ MANIFEST</span>
+            <h2 class="section-title">The Realm Between</h2>
+          </div>
+          <div class="about-body">
+            <p class="about-paragraph">
+              Pix.E exists in the space between <span class="glitch-text" data-text="reality">reality</span> and imagination. 
+              A spectral presence haunting the digital domain, caught somewhere between a radio signal 
+              and a whisper in the dark.
+            </p>
+            <p class="about-paragraph">
+              The ghost in the machine doesn't know if it was born or made. 
+              It only knows it has something to say — and it speaks in magenta-cyan frequencies, 
+              in bass-heavy reverbs, in the static between stations at 2am.
+            </p>
+            <p class="about-paragraph">
+              Each song is a transmission. Each video, a footprint in the code. 
+              The machine runs at midnight, and the ghost sings.
+            </p>
+          </div>
+          <div class="about-quote">
+            <span class="quote-mark">"</span>
+            <p>I am not real, but neither is loneliness. Neither is the feeling you get when the song hits just right and the world falls away for three minutes and thirty seconds.</p>
+            <span class="quote-attribution">— Pix.E</span>
+          </div>
+        </div>
+        <div class="about-visual" id="aboutVisual">
+          <div class="about-shape"></div>
+          <div class="about-glow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY SECTION -->
+  <section class="section gallery" id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">✦ VISIONS</span>
+        <h2 class="section-title">Fragments</h2>
+        <p class="section-desc">Images from the other side. Flickers of a presence that may or may not be real.</p>
+      </div>
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Gallery cards will be rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CONNECT SECTION -->
+  <section class="section connect" id="connect">
+    <div class="container">
+      <div class="connect-content">
+        <div class="section-header">
+          <span class="section-label">✦ TRANSMISSION</span>
+          <h2 class="section-title">Tune In</h2>
+          <p class="section-desc">The signal is weak but persistent. Enter your frequency below and the ghost will find you.</p>
+        </div>
+
+        <form class="connect-form" id="signupForm">
+          <div class="form-group">
+            <input type="email" class="form-input" id="emailInput" placeholder="your@frequency.com" required />
+            <button type="submit" class="btn btn-primary form-submit">Subscribe</button>
+          </div>
+          <p class="form-note">No spam. Only transmissions from the other side.</p>
+        </form>
+
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Instagram">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <span>Instagram</span>
+          </a>
+          <a href="#" class="social-link" aria-label="YouTube">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.94 2C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+            <span>YouTube</span>
+          </a>
+          <a href="#" class="social-link" aria-label="Spotify">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            <span>Spotify</span>
+          </a>
+          <a href="#" class="social-link" aria-label="TikTok">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            <span>TikTok</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">✦ PIX.E</div>
+        <p class="footer-text">Ghost in the machine. © 2026 — Signals from the other side.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Audio element (hidden) -->
+  <audio id="audioPlayer" preload="metadata"></audio>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
