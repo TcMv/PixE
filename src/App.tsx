@@ -83,7 +83,7 @@ export default function App() {
         revealImage="/code.jpg"
         radius={120}
         bgSize="contain"
-        className="h-screen flex items-center justify-center"
+        className="max-h-screen mx-auto aspect-[9/16]"
         idleTimeout={3000}
       >
         <div className="relative z-20 flex flex-col items-center justify-center h-full px-6 text-center">
