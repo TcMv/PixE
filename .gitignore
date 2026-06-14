@@ -22,4 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-upload.html\nupload_server.py
+
+# Internal tools
+upload.html
+upload_server.py
