@@ -14,7 +14,8 @@ const TRACKS: Track[] = [
   { id: 'ghost_in_the_machine', title: 'Ghost in the Machine', file: '/audio/ghost-in-the-machine.m4a', duration: '3:56', mood: 'Ethereal' },
   { id: 'delete_you',         title: 'Delete You',            file: '/audio/delete-you.m4a',           duration: '3:56', mood: 'Melancholic' },
   { id: 'pixel_heart',        title: 'Pixel Heart',           file: '/audio/pixel-heart.m4a',          duration: '2:32', mood: 'Upbeat' },
-  { id: 'soft_collapse',      title: 'Soft Collapse',          file: null, duration: '—', mood: 'Ambient' },
+  { id: 'static_lullaby',     title: 'Static Lullaby',        file: '/audio/static-lullaby.m4a',       duration: '2:52', mood: 'Ambient' },
+  { id: 'soft_collapse',      title: 'Soft Collapse',          file: null, duration: '—', mood: 'Melancholic' },
 ]
 
 function formatTime(seconds: number): string {
