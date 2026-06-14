@@ -106,8 +106,19 @@ export default function AudioPlayer() {
           if (a) setDuration(a.duration)
         }}
         onEnded={() => {
-          setIsPlaying(false)
-          setCurrentTime(0)
+          // Auto-advance to next track
+          const currentIdx = TRACKS.findIndex(t => t.id === currentTrack)
+          const nextTrack = TRACKS.slice(currentIdx + 1).find(t => t.file)
+          if (nextTrack && nextTrack.file) {
+            loadTrack(nextTrack.id)
+            const a = audioRef.current
+            if (a) {
+              a.addEventListener('canplay', () => a.play(), { once: true })
+            }
+          } else {
+            setIsPlaying(false)
+            setCurrentTime(0)
+          }
         }}
       />
 
