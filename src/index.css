@@ -140,3 +140,23 @@ body::after {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 168, 75, 0.5);
 }
+
+/* ── Audio Player Animations ── */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes eq-pulse {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+.eq-bar-animate {
+  animation: eq-pulse 0.6s ease-in-out infinite alternate;
+  transform-origin: bottom;
+}
+
+/* ── Progress bar hover thumb ── */

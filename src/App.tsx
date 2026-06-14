@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react'
+import AudioPlayer from './components/AudioPlayer'
 import SpotlightReveal from './components/SpotlightReveal'
 import './index.css'
-
-const SONG_SNIPPETS = [
-  { title: "Ghost in the Static", duration: "3:42", mood: "Ethereal" },
-  { title: "Neon Bloom", duration: "4:11", mood: "Dreamy" },
-  { title: "Digital Veins", duration: "3:28", mood: "Atmospheric" },
-  { title: "Soft Collapse", duration: "4:05", mood: "Melancholic" },
-  { title: "Phase Shift", duration: "3:56", mood: "Upbeat" },
-  { title: "Hollow Light", duration: "4:33", mood: "Ambient" },
-]
 
 export default function App() {
   const [showCursor, setShowCursor] = useState(false)
@@ -110,40 +102,9 @@ export default function App() {
             <p className="text-xs tracking-[0.3em] uppercase text-gold/60 font-medium mb-4">
               Discography
             </p>
-            <h2 className="font-display italic text-4xl md:text-5xl gradient-text mb-4">
-              Songs from the machine
-            </h2>
-            <p className="text-cream-muted text-lg font-light max-w-xl mb-16">
-              Each track is a conversation between organic warmth and digital texture. 
-              AI-generated vocals wrapped in analog synths and field recordings.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            {SONG_SNIPPETS.map((song, i) => (
-              <div
-                key={song.title}
-                className={`reveal reveal-delay-${(i % 3) + 1} glass-gold rounded-xl p-6 group cursor-default hover:bg-gold/10 transition-all duration-500`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <span className="text-2xl font-display italic text-cream/20 group-hover:text-gold/40 transition-colors">
-                    {(i + 1).toString().padStart(2, '0')}
-                  </span>
-                  <span className="text-xs text-cream-muted/40 uppercase tracking-wider">{song.mood}</span>
-                </div>
-                <h3 className="font-display italic text-xl text-cream group-hover:text-gold transition-colors mb-2">
-                  {song.title}
-                </h3>
-                <div className="flex items-center gap-3 text-sm text-cream-muted/60">
-                  <span>{song.duration}</span>
-                  <span className="w-1 h-1 rounded-full bg-cream-muted/20" />
-                  <span className="text-gold/50">Coming Soon</span>
-                </div>
-                <div className="mt-4 h-[1px] w-full bg-cream/5 group-hover:bg-gold/20 transition-colors">
-                  <div className="h-full w-0 group-hover:w-1/3 bg-gold/50 transition-all duration-700" />
-                </div>
-              </div>
-            ))}
+            <div className="max-w-2xl mx-auto">
+              <AudioPlayer />
+            </div>
           </div>
         </div>
       </section>
