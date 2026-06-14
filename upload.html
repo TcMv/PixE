@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Upload for Pix.E</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #f5f0e8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(212,168,75,0.15);
+      border-radius: 20px;
+      padding: 40px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+      font-size: 2rem;
+      background: linear-gradient(135deg, #d4a84b, #f5f0e8, #e8c97a, #b8943a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    p { color: #c4bdb2; font-size: 14px; margin-bottom: 24px; }
+    .drop-zone {
+      border: 2px dashed rgba(212,168,75,0.3);
+      border-radius: 12px;
+      padding: 40px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #d4a84b;
+      background: rgba(212,168,75,0.1);
+    }
+    .drop-zone.has-file {
+      border-color: #4ade80;
+      border-style: solid;
+    }
+    .drop-zone p { margin-bottom: 0; color: #c4bdb2; }
+    .drop-zone .icon { font-size: 48px; margin-bottom: 12px; }
+    input[type="file"] { display: none; }
+    .file-name { margin-top: 12px; font-size: 13px; color: #d4a84b; }
+    .upload-btn {
+      margin-top: 20px;
+      padding: 12px 32px;
+      border-radius: 999px;
+      border: none;
+      background: #d4a84b;
+      color: #0a0a0f;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-btn:hover { background: #e8c97a; transform: scale(1.02); }
+    .upload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .status { margin-top: 16px; font-size: 13px; }
+    .status.success { color: #4ade80; }
+    .status.error { color: #f87171; }
+    .uploads { margin-top: 20px; text-align: left; }
+    .uploads h3 { font-size: 13px; color: #c4bdb2; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.2em; }
+    .uploads ul { list-style: none; }
+    .uploads li {
+      font-size: 13px;
+      color: #f5f0e8;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .uploads li small { color: #c4bdb2; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Pix.E</h1>
+    <p>Drop your tracks here</p>
+
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">🎵</div>
+      <p>Drag & drop audio files here</p>
+      <p style="font-size:12px;margin-top:8px">or click to browse</p>
+      <input type="file" id="fileInput" multiple accept="audio/*" />
+    </div>
+    <div class="file-name" id="fileName"></div>
+    <button class="upload-btn" id="uploadBtn" disabled>Upload</button>
+    <div class="status" id="status"></div>
+
+    <div class="uploads" id="uploadsSection" style="display:none">
+      <h3>Uploaded</h3>
+      <ul id="uploadList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const status = document.getElementById('status');
+    const uploadList = document.getElementById('uploadList');
+    const uploadsSection = document.getElementById('uploadsSection');
+
+    let selectedFiles = [];
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', () => {
+      handleFiles(fileInput.files);
+    });
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files);
+      if (selectedFiles.length === 0) return;
+      const names = selectedFiles.map(f => f.name).join(', ');
+      fileName.textContent = names;
+      dropZone.classList.add('has-file');
+      uploadBtn.disabled = false;
+    }
+
+    uploadBtn.addEventListener('click', async () => {
+      if (selectedFiles.length === 0) return;
+
+      uploadBtn.disabled = true;
+      status.textContent = 'Uploading...';
+      status.className = 'status';
+
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const res = await fetch('/upload', { method: 'POST', body: formData });
+          const data = await res.json();
+          if (res.ok) {
+            const li = document.createElement('li');
+            li.innerHTML = `${file.name} <small>(${(file.size / 1024 / 1024).toFixed(1)} MB)</small>`;
+            uploadList.appendChild(li);
+            uploadsSection.style.display = 'block';
+            status.textContent = `${file.name} uploaded!`;
+            status.className = 'status success';
+          } else {
+            status.textContent = `Error: ${data.error || 'Unknown'}`;
+            status.className = 'status error';
+          }
+        } catch (err) {
+          status.textContent = 'Upload failed — is the server running?';
+          status.className = 'status error';
+        }
+      }
+
+      selectedFiles = [];
+      fileName.textContent = '';
+      dropZone.classList.remove('has-file');
+      uploadBtn.disabled = true;
+    });
+  </script>
+</body>
+</html>
