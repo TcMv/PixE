@@ -9,12 +9,12 @@ interface Track {
 }
 
 const TRACKS: Track[] = [
-  { id: 'neon_rain',   title: 'Neon Rain',     file: '/audio/neon-rain.m4a',    duration: '3:57', mood: 'Dreamy' },
-  { id: 'two_am_wisdom', title: '2am Wisdom',  file: '/audio/2am-wisdom.m4a',   duration: '4:04', mood: 'Atmospheric' },
-  { id: 'ghost_in_the_machine', title: 'Ghost in the Machine', file: null, duration: '—', mood: 'Ethereal' },
-  { id: 'delete_you',  title: 'Delete You',    file: null, duration: '—', mood: 'Melancholic' },
-  { id: 'pixel_heart', title: 'Pixel Heart',   file: null, duration: '—', mood: 'Upbeat' },
-  { id: 'soft_collapse', title: 'Soft Collapse', file: null, duration: '—', mood: 'Ambient' },
+  { id: 'neon_rain',          title: 'Neon Rain',            file: '/audio/neon-rain.m4a',             duration: '3:57', mood: 'Dreamy' },
+  { id: 'two_am_wisdom',      title: '2am Wisdom',           file: '/audio/2am-wisdom.m4a',            duration: '4:04', mood: 'Atmospheric' },
+  { id: 'ghost_in_the_machine', title: 'Ghost in the Machine', file: '/audio/ghost-in-the-machine.m4a', duration: '3:56', mood: 'Ethereal' },
+  { id: 'delete_you',         title: 'Delete You',            file: null, duration: '—', mood: 'Melancholic' },
+  { id: 'pixel_heart',        title: 'Pixel Heart',           file: null, duration: '—', mood: 'Upbeat' },
+  { id: 'soft_collapse',      title: 'Soft Collapse',          file: null, duration: '—', mood: 'Ambient' },
 ]
 
 function formatTime(seconds: number): string {
